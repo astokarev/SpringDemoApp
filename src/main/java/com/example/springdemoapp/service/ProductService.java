@@ -1,33 +1,34 @@
 package com.example.springdemoapp.service;
 
 import com.example.springdemoapp.model.Product;
+import com.example.springdemoapp.repository.ProductRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class ProductService {
-    private Long ID = 0L;
-    private List<Product> products = new ArrayList<>();
+    private final ProductRepository productRepository;
 
-    {
-        products.add(new Product(++ID, "Sony Playstation 4", "fat32", 25000, "Moscow", "Sasha"));
+    public List<Product> listProducts(String title) {
+        if (title != null) return productRepository.findByTitle(title);
+        return productRepository.findAll();
     }
-    public List<Product> listProducts() {return products;}
 
-    public void saveProduct(Product product){
-        product.setId(++ID);
-        products.add(product);
+    public void saveProduct(Product product) {
+        log.info("Saving new {}", product);
+        productRepository.save(product);
+    }
+
+    public void deleteProduct(Long id) {
+        productRepository.deleteById(id);
     }
 
     public Product getProductById(Long id) {
-        for (Product product : products) {
-            if (product.getId().equals(id)) return product;
-        }
-        return null;
-    }
-
-    public void deleteProduct(Long id){
-        products.removeIf(product -> product.getId().equals(id));
+        return productRepository.findById(id).orElse(null);
     }
 }
