@@ -11,7 +11,7 @@
     </div>
 </#list>
 <hr>
-<h3>Создать новый товар</h3>
+<h3>Добавить новый товар</h3>
 <form action="/product/create" method="post">
     Название объявления: <input type="text" name="title"/><br><br>
     Описание объявления: <input type="text" name="description"/><br><br>
