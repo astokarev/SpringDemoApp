@@ -18,8 +18,9 @@ import java.security.Principal;
 public class ProductController {
     private final ProductService productService;
     @GetMapping("/")
-    public String products(@RequestParam(name = "title", required = false) String title, Model model) {
+    public String products(@RequestParam(name = "title", required = false) String title, Model model, Principal principal) {
         model.addAttribute("products", productService.listProducts(title));
+        model.addAttribute("user", productService.getUserByPrincipal(principal));
         return "products";
     }
     @GetMapping("/product/{id}")

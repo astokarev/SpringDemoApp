@@ -2,19 +2,15 @@ package com.example.springdemoapp.configurations;
 import com.example.springdemoapp.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
-import org.springframework.security.config.annotation.web.configuration.*;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.stereotype.Component;
 
@@ -24,11 +20,12 @@ import org.springframework.stereotype.Component;
 public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/", "/products").permitAll()
+                        .requestMatchers("/", "/product/**", "/images/**", "/registration", "/user/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
@@ -39,18 +36,20 @@ public class SecurityConfig {
 
         return http.build();
     }
-
     @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user =
-                User.withDefaultPasswordEncoder()
-                        .username("user")
-                        .password("password")
-                        .roles("USER")
-                        .build();
+    public AuthenticationManager authenticationManager(
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
 
-        return new InMemoryUserDetailsManager(user);
+        ProviderManager providerManager = new ProviderManager(authenticationProvider);
+        providerManager.setEraseCredentialsAfterAuthentication(false);
+
+        return providerManager;
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
